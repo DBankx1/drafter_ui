@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import DashedSeparator from "@/components/ui/dashed-separator";
-import { Check, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface PricingCardProps {
   title: string;

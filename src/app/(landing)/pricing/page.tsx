@@ -1,7 +1,7 @@
 import CallToActionSection from "@/components/landing/home/cta";
 import PricingCard from "@/components/landing/pricing/pricing-card";
 import PricingHeader from "@/components/landing/pricing/pricing-header";
-import { PRICING_TIERS } from "@/lib/constants";
+import { PRICING_TIERS } from "@/lib/landing-constants";
 
 function PricingPage() {
   return (

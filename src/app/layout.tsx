@@ -2,7 +2,6 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/theme-provider";
-import { AppContainer } from "@/components/ui/app-container";
 
 export const metadata: Metadata = {
   title: "Drafter",

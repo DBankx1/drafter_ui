@@ -1,4 +1,4 @@
-import { PUBLIC_NAV_ITEMS } from "@/lib/constants";
+import { PUBLIC_NAV_ITEMS } from "@/lib/landing-constants";
 import {
   Sheet,
   SheetContent,

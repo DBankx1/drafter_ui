@@ -1,5 +1,5 @@
 import type { NavigationItem } from "@/types/navigation-item";
-import { ArrowDownUp, FileCodeCorner } from "lucide-react";
+import { ArrowDownUp, Chromium, FileCodeCorner } from "lucide-react";
 
 export const PUBLIC_NAV_ITEMS: NavigationItem[] = [
   {
@@ -8,18 +8,26 @@ export const PUBLIC_NAV_ITEMS: NavigationItem[] = [
     type: "dropdown",
     subItems: [
       {
-        icon: ArrowDownUp,
-        title: "API",
-        href: "/solutions/api",
-        description:
-          "RESTful API access that allows you to interact with the platform.",
-      },
-      {
         icon: FileCodeCorner,
         title: "Embed",
         href: "/solutions/embed",
         description:
           "Embed a customizable chat agent into your website or application",
+      },
+      {
+        icon: ArrowDownUp,
+        title: "API",
+        href: "/solutions/api",
+        description:
+          "RESTful API access that allows you to interact with the platform",
+      },
+      {
+        icon: Chromium,
+        title: "Extension",
+        href: "/solutions/browser-extension",
+        status: "coming soon",
+        description:
+          "A browser extension that generates proposals from your conversations",
       },
     ],
   },
@@ -69,5 +77,32 @@ export const PRICING_TIERS = [
     features: ["API access", "CRM integrations", "Priority support"],
     ctaText: "Contact Sales",
     featured: false,
+  },
+];
+
+export const logos = [
+  {
+    name: "Vercel",
+    src: "/images/clients/vercel.svg",
+  },
+  {
+    name: "Upwork",
+    src: "/images/clients/upwork.svg",
+  },
+  {
+    name: "Taskrabbit",
+    src: "/images/clients/taskrabbit.svg",
+  },
+  {
+    name: "Alpine",
+    src: "/images/clients/alpine.svg",
+  },
+  {
+    name: "Amazon",
+    src: "/images/clients/amazon.svg",
+  },
+  {
+    name: "Rhombus",
+    src: "/logos/rhombus.svg",
   },
 ];

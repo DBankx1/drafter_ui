@@ -10,4 +10,5 @@ export type SubItems = {
   icon?: any;
   href: string;
   description: string;
+  status?: string;
 };

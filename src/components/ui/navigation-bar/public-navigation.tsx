@@ -10,7 +10,9 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/system/mode-toggle";
-import { PUBLIC_NAV_ITEMS } from "@/lib/constants";
+import { PUBLIC_NAV_ITEMS } from "@/lib/landing-constants";
+import { ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 function PublicNavigation() {
   return (
@@ -30,6 +32,7 @@ function PublicNavigation() {
                           title={child.title}
                           href={child.href}
                           icon={child.icon}
+                          status={child.status}
                         >
                           {child.description}
                         </ListItem>
@@ -52,8 +55,9 @@ function PublicNavigation() {
 
       {/* Desktop Action Buttons - Hidden on mobile */}
       <div className="hidden items-center gap-2 md:flex">
-        <Button asChild>
+        <Button>
           <Link href="/signup">Get Started</Link>
+          <ChevronRight />
         </Button>
         <ModeToggle />
       </div>
@@ -68,11 +72,13 @@ function ListItem({
   children,
   href,
   icon: Icon,
+  status,
   ...props
 }: Readonly<{
   title: string;
   children: React.ReactNode;
   href: string;
+  status?: string;
   icon: React.ComponentType<{ className?: string }>;
 }>) {
   return (
@@ -80,11 +86,14 @@ function ListItem({
       <NavigationMenuLink asChild>
         <Link href={href}>
           <div className="flex flex-row items-start gap-2">
-            <div>
+            <div className="bg-secondary border-primary/20 rounded-md border p-2">
               <Icon className="h-10 w-10" />
             </div>
             <div className="flex flex-col gap-1 text-sm">
-              <div className="leading-none font-medium">{title}</div>
+              <div className="flex flex-row items-center gap-4">
+                <span className="leading-none font-medium">{title}</span>
+                {status && <Badge className="bg-amber-300">{status}</Badge>}
+              </div>
               <div className="text-muted-foreground line-clamp-2">
                 {children}
               </div>
