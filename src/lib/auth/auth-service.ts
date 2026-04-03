@@ -1,3 +1,5 @@
+import { fetchWithAuth } from "./api-client";
+
 const API_BASE_URL = process.env.API_BASE_URL;
 
 export type AuthUser = {
@@ -70,7 +72,7 @@ export async function signup(
 export async function apiRefreshToken(
   refresh_token: string,
 ): Promise<AuthResponse> {
-  const res = await fetch(`${API_BASE_URL}api/v1/auth/refresh`, {
+  const res = await fetchWithAuth(`${API_BASE_URL}api/v1/auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refresh_token }),
