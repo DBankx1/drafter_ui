@@ -25,7 +25,9 @@ export default async function DashboardLayout({
   const authenticatedUser = {
     name: session.name || session.email,
     email: session.email,
-    avatar: "", // Placeholder - can be expanded later with profile photos
+    avatar:
+      business.logo_url ||
+      `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(business.name || session.name)}`,
   };
 
   return (
@@ -44,7 +46,13 @@ export default async function DashboardLayout({
         <AppSidebar variant="inset" />
         <SidebarInset>
           <SiteHeader />
-          <main>{children}</main>
+          <main>
+            <div className="flex flex-1 flex-col">
+              <div className="@container/main flex flex-1 flex-col gap-2">
+                {children}
+              </div>
+            </div>
+          </main>
         </SidebarInset>
       </SidebarProvider>
     </BusinessProvider>

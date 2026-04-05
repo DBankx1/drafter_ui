@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   IconCreditCard,
@@ -6,13 +6,9 @@ import {
   IconLogout,
   IconNotification,
   IconUserCircle,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,24 +17,27 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import type { Business } from "@/types/business";
 
 export function NavUser({
   user,
+  business,
 }: {
   readonly user: {
-    readonly name: string
-    readonly email: string
-    readonly avatar: string
-  }
+    readonly name: string;
+    readonly email: string;
+    readonly avatar: string;
+  };
+  readonly business: Business;
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
 
   // Generate initials from user name
   const getInitials = (name: string) => {
@@ -46,10 +45,10 @@ export function NavUser({
       .split(" ")
       .map((part) => part.charAt(0).toUpperCase())
       .slice(0, 2)
-      .join("")
-  }
+      .join("");
+  };
 
-  const initials = getInitials(user.name)
+  const initials = getInitials(user.name);
 
   return (
     <SidebarMenu>
@@ -62,12 +61,14 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {user.email}
+                <span className="truncate font-medium">{business.name}</span>
+                <span className="text-muted-foreground truncate text-xs">
+                  {business.email}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -83,12 +84,14 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {user.email}
+                  <span className="truncate font-medium">{business.name}</span>
+                  <span className="text-muted-foreground truncate text-xs">
+                    {business.email}
                   </span>
                 </div>
               </div>
@@ -117,5 +120,5 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

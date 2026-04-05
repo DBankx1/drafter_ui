@@ -4,19 +4,16 @@ import * as React from "react";
 import {
   IconCamera,
   IconChartBar,
+  IconCurrencyDollar,
   IconDashboard,
   IconDatabase,
   IconFileAi,
   IconFileDescription,
-  IconFileWord,
-  IconFolder,
+  IconFileTextSpark,
   IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
+  IconMessage2Cog,
   IconSearch,
   IconSettings,
-  IconUsers,
 } from "@tabler/icons-react";
 
 import { useBusinessContext } from "@/context/business-context";
@@ -33,33 +30,29 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { FileIcon } from "lucide-react";
 
 const navData = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
+      title: "Proposals",
+      url: "/proposals",
+      icon: IconFileTextSpark,
     },
     {
-      title: "Analytics",
-      url: "#",
+      title: "Engagements",
+      url: "/engagements",
       icon: IconChartBar,
     },
     {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
+      title: "Agent Config",
+      url: "/agent",
+      icon: IconMessage2Cog,
     },
   ],
   navClouds: [
@@ -129,19 +122,14 @@ const navData = {
   ],
   documents: [
     {
-      name: "Data Library",
-      url: "#",
+      name: "Knowledge Base",
+      url: "/knowledge",
       icon: IconDatabase,
     },
     {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
+      name: "Pricing Config",
+      url: "/pricing",
+      icon: IconCurrencyDollar,
     },
   ],
 };
@@ -163,8 +151,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <a href="/dashboard">
-                <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">{business.name}</span>
+                <FileIcon className="size-5!" />
+                <span className="text-base font-semibold">Drafter</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -176,7 +164,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={navData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={user} business={business} />
       </SidebarFooter>
     </Sidebar>
   );
