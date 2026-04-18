@@ -49,6 +49,30 @@ export async function UploadTextKnowledgeBase(
   return res.json();
 }
 
+export async function UploadUrlKnowledgeBase(
+  url: string,
+): Promise<KnowledgeBase> {
+  const res = await fetchWithAuth(
+    `${process.env.API_BASE_URL}api/v1/knowledge-base/upload/url?url=${encodeURIComponent(url)}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    console.log(error);
+    const error_detail =
+      typeof error.detail === "string" ? error.detail : error.detail[0]?.msg;
+    throw new Error(error_detail ?? "Error occurred Indexing URL");
+  }
+
+  return res.json();
+}
+
 export async function getKnowlegeBaseList(): Promise<KnowledgeBase[]> {
   const res = await fetchWithAuth(
     `${process.env.API_BASE_URL}api/v1/knowledge-base`,

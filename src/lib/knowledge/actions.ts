@@ -4,6 +4,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
   UploadPDFKnowledgeBase,
   UploadTextKnowledgeBase,
+  UploadUrlKnowledgeBase,
 } from "./knowledge-base-service";
 import type { KnowledgeBase } from "@/types/knowledge-base";
 
@@ -50,6 +51,22 @@ export async function uploadTextKnowledgeBaseAction(
 ): Promise<UploadKnowledgeBaseAction> {
   try {
     const result = await UploadTextKnowledgeBase(label, content);
+    return { success: true, data: result };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
+}
+
+export async function uploadUrlKnowledgeBaseAction(
+  prevState: UploadKnowledgeBaseAction,
+  url: string,
+): Promise<UploadKnowledgeBaseAction> {
+  try {
+    const result = await UploadUrlKnowledgeBase(url);
     return { success: true, data: result };
   } catch (error) {
     if (isRedirectError(error)) throw error;

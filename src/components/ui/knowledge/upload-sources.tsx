@@ -1,5 +1,6 @@
 import PDFUploader from "./pdf-uploader";
 import TextUploader from "./txt-uploader";
+import URLUploader from "./url-uploader";
 
 export default function KnowledgeBaseUploadSources() {
   return (
@@ -10,6 +11,7 @@ export default function KnowledgeBaseUploadSources() {
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <PDFUploader />
         <TextUploader />
+        <URLUploader />
       </div>
     </div>
   );

@@ -50,7 +50,6 @@ export default function TXTUploader() {
     const label =
       form.label.trim() ||
       `Text snippet — ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
-    // do something with the text snippet (e.g. send to server, update state, etc.)
     startTransition(async () => {
       const result = await uploadTextKnowledgeBaseAction(
         { success: false },
