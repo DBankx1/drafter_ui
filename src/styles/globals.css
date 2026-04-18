@@ -137,3 +137,41 @@
   object-fit: cover;
   z-index: -1;
 }
+
+.kb-filter-btn {
+  padding: 5px 13px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  background: transparent;
+  color: #64748b;
+  font-family: inherit;
+  transition: all 0.12s;
+
+  &active {
+    background: #0f172a;
+    color: #fff;
+    border-color: #0f172a;
+  }
+
+  &:not(.active):hover {
+    background: #f1f5f9;
+  }
+}
+
+.kb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.12s;
+}
+.kb-row:last-child {
+  border-bottom: none;
+}
+.kb-row:hover {
+  background: #f8fafc;
+}

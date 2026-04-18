@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -37,6 +38,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div>{children}</div>
+          <Toaster richColors />
         </ThemeProvider>
       </body>
     </html>

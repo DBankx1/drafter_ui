@@ -1,14 +1,31 @@
-import PDFUploader from "./pdf-uploader";
+"use client";
 
-export default function KnowledgeBaseSources() {
+import { useState } from "react";
+import {
+  KnowledgeBaseStatus,
+  KnowledgeBaseType,
+  type KnowledgeBase,
+} from "@/types/knowledge-base";
+import { KnowledgeBaseTable } from "@/components/ui/knowledge/sources/table";
+
+export default function KnowledgeBaseSources({
+  kbList,
+}: Readonly<{ kbList: KnowledgeBase[] }>) {
+  const [kb, setKb] = useState(kbList);
+
   return (
     <div>
       <p className="text-upper text-primary/50 text-xs font-bold tracking-wider uppercase">
-        Add knowledge source
+        Your Knowledge Sources
       </p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <PDFUploader />
-      </div>
+      <KnowledgeBaseTable
+        className="mt-4"
+        data={kb}
+        onView={(item) => console.log(`/sources/${item.id}`)}
+        onDownload={(item) => console.log(item)}
+        onDelete={(item) => console.log(item.id)}
+        onAddSource={() => console.log(true)}
+      />
     </div>
   );
 }

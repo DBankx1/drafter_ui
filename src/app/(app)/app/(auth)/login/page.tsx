@@ -9,12 +9,7 @@ export default async function LoginPage() {
 
   return (
     <main className="">
-      <div
-        className="flex grow flex-col"
-        style={{
-          position: "relative",
-        }}
-      >
+      <div className="relative flex grow flex-col">
         <Image
           src="/images/auth/background.jpg"
           alt="Cover Image"
