@@ -20,9 +20,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type {
-  KnowledgeBase,
-  KnowledgeBaseActions,
+import {
+  KnowledgeBaseType,
+  type KnowledgeBase,
+  type KnowledgeBaseActions,
 } from "@/types/knowledge-base";
 
 interface Props {
@@ -44,18 +45,18 @@ export const KnowledgeBaseRowActions = memo(function KnowledgeBaseRowActions({
           <Button
             variant="outline"
             size="sm"
-            className="h-7 gap-1.5 text-xs font-medium"
+            className="h-7 cursor-pointer gap-1.5 text-xs font-medium"
             onClick={() => actions.onView!(item)}
           >
             <Eye className="h-3 w-3" />
             View
           </Button>
         )}
-        {actions.onDownload && (
+        {actions.onDownload && item.source_type === KnowledgeBaseType.PDF && (
           <Button
             variant="outline"
             size="sm"
-            className="h-7 gap-1.5 text-xs font-medium"
+            className="h-7 cursor-pointer gap-1.5 text-xs font-medium"
             onClick={() => actions.onDownload!(item)}
           >
             <Download className="h-3 w-3" />
@@ -66,7 +67,7 @@ export const KnowledgeBaseRowActions = memo(function KnowledgeBaseRowActions({
           <Button
             variant="outline"
             size="sm"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20 hover:border-destructive/40 h-7 gap-1.5 text-xs font-medium"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20 hover:border-destructive/40 h-7 cursor-pointer gap-1.5 text-xs font-medium"
             onClick={() => setConfirmDelete(true)}
           >
             <Trash2 className="h-3 w-3" />
@@ -91,12 +92,13 @@ export const KnowledgeBaseRowActions = memo(function KnowledgeBaseRowActions({
                 View
               </DropdownMenuItem>
             )}
-            {actions.onDownload && (
-              <DropdownMenuItem onClick={() => actions.onDownload!(item)}>
-                <Download className="mr-2 h-3.5 w-3.5" />
-                Download
-              </DropdownMenuItem>
-            )}
+            {actions.onDownload &&
+              item.source_type === KnowledgeBaseType.PDF && (
+                <DropdownMenuItem onClick={() => actions.onDownload!(item)}>
+                  <Download className="mr-2 h-3.5 w-3.5" />
+                  Download
+                </DropdownMenuItem>
+              )}
             {(actions.onView || actions.onDownload) && actions.onDelete && (
               <DropdownMenuSeparator />
             )}

@@ -7,6 +7,7 @@ import {
   UploadUrlKnowledgeBase,
 } from "./knowledge-base-service";
 import type { KnowledgeBase } from "@/types/knowledge-base";
+import { getSignedUrl } from "../supabase";
 
 interface UploadKnowledgeBaseAction {
   error?: string;
@@ -75,4 +76,11 @@ export async function uploadUrlKnowledgeBaseAction(
       error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
+}
+
+export async function viewKnowledgeBaseAction(
+  path: string,
+  options?: { download?: boolean },
+): Promise<string> {
+  return await getSignedUrl("knowledge-bases", path, 60, options);
 }

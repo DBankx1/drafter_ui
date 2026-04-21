@@ -30,6 +30,7 @@ export type KnowledgeBase = {
   business_id: string;
   source_type: KnowledgeBaseType;
   status: KnowledgeBaseStatus;
+  source_reference: string;
   uploaded_at: Date;
   meta: any;
   name: string;

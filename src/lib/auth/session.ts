@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseClient } from "../supabase";
 import { getAuthTokens } from "./cookies";
 
 export type Session = {
@@ -7,13 +7,6 @@ export type Session = {
   name: string;
   accessToken: string;
 };
-
-function getSupabaseClient() {
-  return createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-  );
-}
 
 export async function getSession(): Promise<Session | null> {
   const tokens = await getAuthTokens();

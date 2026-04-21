@@ -64,7 +64,6 @@ export async function UploadUrlKnowledgeBase(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    console.log(error);
     const error_detail =
       typeof error.detail === "string" ? error.detail : error.detail[0]?.msg;
     throw new Error(error_detail ?? "Error occurred Indexing URL");

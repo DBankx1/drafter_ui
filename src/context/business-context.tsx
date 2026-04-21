@@ -14,7 +14,7 @@ export type BusinessContextType = {
 };
 
 const BusinessContext = createContext<BusinessContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function BusinessProvider({
@@ -35,7 +35,7 @@ export function BusinessProvider({
       business: initialBusiness,
       user: initialUser,
     }),
-    [initialBusiness, initialUser]
+    [initialBusiness, initialUser],
   );
 
   return (
@@ -45,16 +45,12 @@ export function BusinessProvider({
   );
 }
 
-/**
- * Hook to access business and user data from context.
- * Must be used inside a component wrapped by BusinessProvider.
- */
 export function useBusinessContext() {
   const context = useContext(BusinessContext);
 
   if (context === undefined) {
     throw new Error(
-      "useBusinessContext must be used inside a BusinessProvider"
+      "useBusinessContext must be used inside a BusinessProvider",
     );
   }
 

@@ -7,6 +7,7 @@ export const env = createEnv({
     API_BASE_URL: z.string().url(),
     SUPABASE_URL: z.string().url(),
     SUPABASE_PUBLISHABLE_KEY: z.string(),
+    SUPABASE_SECRET_KEY: z.string(),
   },
 
   client: {
@@ -17,6 +18,7 @@ export const env = createEnv({
     API_BASE_URL: process.env.API_BASE_URL,
     SUPABASE_URL: process.env.SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY,
+    SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
