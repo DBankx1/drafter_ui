@@ -2,6 +2,7 @@
 
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
+  deleteKnowledgeBase,
   UploadPDFKnowledgeBase,
   UploadTextKnowledgeBase,
   UploadUrlKnowledgeBase,
@@ -64,10 +65,11 @@ export async function uploadTextKnowledgeBaseAction(
 
 export async function uploadUrlKnowledgeBaseAction(
   prevState: UploadKnowledgeBaseAction,
+  label: string,
   url: string,
 ): Promise<UploadKnowledgeBaseAction> {
   try {
-    const result = await UploadUrlKnowledgeBase(url);
+    const result = await UploadUrlKnowledgeBase(label, url);
     return { success: true, data: result };
   } catch (error) {
     if (isRedirectError(error)) throw error;
@@ -83,4 +85,19 @@ export async function viewKnowledgeBaseAction(
   options?: { download?: boolean },
 ): Promise<string> {
   return await getSignedUrl("knowledge-bases", path, 60, options);
+}
+
+export async function deleteKnowledgeBaseAction(
+  id: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await deleteKnowledgeBase(id);
+    return { success: true };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
+  }
 }

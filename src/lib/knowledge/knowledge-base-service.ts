@@ -50,15 +50,18 @@ export async function UploadTextKnowledgeBase(
 }
 
 export async function UploadUrlKnowledgeBase(
+  label: string,
   url: string,
 ): Promise<KnowledgeBase> {
+  const payload = { label, url };
   const res = await fetchWithAuth(
-    `${process.env.API_BASE_URL}api/v1/knowledge-base/upload/url?url=${encodeURIComponent(url)}`,
+    `${process.env.API_BASE_URL}api/v1/knowledge-base/upload/url`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify(payload),
     },
   );
 
@@ -89,4 +92,18 @@ export async function getKnowlegeBaseList(): Promise<KnowledgeBase[]> {
   }
 
   return res.json();
+}
+
+export async function deleteKnowledgeBase(id: string): Promise<void> {
+  const res = await fetchWithAuth(
+    `${process.env.API_BASE_URL}api/v1/knowledge-base/${id}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.detail ?? "Failed to delete knowledge base");
+  }
 }

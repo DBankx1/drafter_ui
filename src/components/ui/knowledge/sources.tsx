@@ -2,7 +2,10 @@
 
 import { KnowledgeBaseType, type KnowledgeBase } from "@/types/knowledge-base";
 import { KnowledgeBaseTable } from "@/components/ui/knowledge/sources/table";
-import { viewKnowledgeBaseAction } from "@/lib/knowledge/actions";
+import {
+  deleteKnowledgeBaseAction,
+  viewKnowledgeBaseAction,
+} from "@/lib/knowledge/actions";
 import {
   Dialog,
   DialogContent,
@@ -13,10 +16,12 @@ import {
 import { FileText } from "lucide-react";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 export default function KnowledgeBaseSources({
   kbList,
 }: Readonly<{ kbList: KnowledgeBase[] }>) {
+  const [kbSources, setKbSources] = useState<KnowledgeBase[]>(kbList);
   const [textPreview, setTextPreview] = useState<{
     name: string;
     content: string;
@@ -54,6 +59,22 @@ export default function KnowledgeBaseSources({
     }
   };
 
+  const deleteKnowledgeBase = async (item: KnowledgeBase) => {
+    const result = await deleteKnowledgeBaseAction(item.id);
+    if (result.success) {
+      setKbSources((prev) => prev.filter((kb) => kb.id !== item.id));
+      toast.success("Knowledge base deleted", {
+        position: "top-center",
+        closeButton: true,
+      });
+    } else {
+      toast.error(result.error ?? "Failed to delete knowledge base", {
+        position: "top-center",
+        closeButton: true,
+      });
+    }
+  };
+
   return (
     <div>
       <p className="text-upper text-primary/50 text-xs font-bold tracking-wider uppercase">
@@ -61,10 +82,10 @@ export default function KnowledgeBaseSources({
       </p>
       <KnowledgeBaseTable
         className="mt-4"
-        data={kbList}
+        data={kbSources}
         onView={viewKnowledgeBase}
         onDownload={downloadKnowledgeBase}
-        onDelete={(item) => console.log(item.id)}
+        onDelete={deleteKnowledgeBase}
         onAddSource={() => console.log(true)}
       />
       <Dialog

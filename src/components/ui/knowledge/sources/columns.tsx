@@ -75,17 +75,17 @@ export function buildColumns(
 
     // ── Size ──────────────────────────────────────────────────────────────────
     {
-      accessorKey: "size_bytes",
+      accessorKey: "kb_size",
       header: () => (
         <span className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
           Size
         </span>
       ),
       cell: ({ getValue }) => {
-        const bytes = getValue() as number | undefined;
+        const bytes = getValue() as number;
         return (
           <span className="text-muted-foreground text-sm tabular-nums">
-            {bytes != null ? formatBytes(bytes) : "—"}
+            {bytes > 0 ? formatBytes(bytes) : "—"}
           </span>
         );
       },
