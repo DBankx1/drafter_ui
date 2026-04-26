@@ -1,4 +1,4 @@
-import type { KnowledgeBase } from "@/types/knowledge-base";
+import type { KnowledgeBase } from "@/lib/types/knowledge-base";
 import { fetchWithAuth } from "../auth/api-client";
 
 export async function UploadPDFKnowledgeBase(

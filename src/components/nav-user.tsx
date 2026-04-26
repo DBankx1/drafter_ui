@@ -24,7 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import type { Business } from "@/types/business";
+import type { Business } from "@/lib/types/business";
 
 export function NavUser({
   user,

@@ -1,5 +1,5 @@
 import { FileText, Globe, Type } from "lucide-react";
-import { KnowledgeBaseType } from "@/types/knowledge-base";
+import { KnowledgeBaseType } from "@/lib/types/knowledge-base";
 import { cn } from "@/lib/utils";
 
 const CONFIG: Record<

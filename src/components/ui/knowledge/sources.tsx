@@ -1,6 +1,9 @@
 "use client";
 
-import { KnowledgeBaseType, type KnowledgeBase } from "@/types/knowledge-base";
+import {
+  KnowledgeBaseType,
+  type KnowledgeBase,
+} from "@/lib/types/knowledge-base";
 import { KnowledgeBaseTable } from "@/components/ui/knowledge/sources/table";
 import {
   deleteKnowledgeBaseAction,

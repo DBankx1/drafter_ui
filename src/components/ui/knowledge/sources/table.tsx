@@ -10,7 +10,7 @@ import {
   type KnowledgeBase,
   type KnowledgeBaseActions,
   KnowledgeBaseType,
-} from "@/types/knowledge-base";
+} from "@/lib/types/knowledge-base";
 import { buildColumns } from "./columns";
 import { DataTable } from "./data-table";
 import { EmptyState } from "./empty-state";

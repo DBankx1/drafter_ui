@@ -24,7 +24,7 @@ import {
   KnowledgeBaseType,
   type KnowledgeBase,
   type KnowledgeBaseActions,
-} from "@/types/knowledge-base";
+} from "@/lib/types/knowledge-base";
 
 interface Props {
   item: KnowledgeBase;

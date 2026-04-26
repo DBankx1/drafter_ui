@@ -1,4 +1,4 @@
-import type { Business } from "@/types/business";
+import type { Business } from "@/lib/types/business";
 import { fetchWithAuth } from "@/lib/auth/api-client";
 
 export async function getMyBusiness(): Promise<Business> {

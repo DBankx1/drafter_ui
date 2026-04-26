@@ -1,4 +1,4 @@
-import type { NavigationItem } from "@/types/navigation-item";
+import type { NavigationItem } from "@/lib/types/navigation-item";
 import { ArrowDownUp, Chromium, FileCodeCorner } from "lucide-react";
 
 export const PUBLIC_NAV_ITEMS: NavigationItem[] = [

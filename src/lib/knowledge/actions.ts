@@ -7,7 +7,7 @@ import {
   UploadTextKnowledgeBase,
   UploadUrlKnowledgeBase,
 } from "./knowledge-base-service";
-import type { KnowledgeBase } from "@/types/knowledge-base";
+import type { KnowledgeBase } from "@/lib/types/knowledge-base";
 import { getSignedUrl } from "../supabase";
 
 interface UploadKnowledgeBaseAction {

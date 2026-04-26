@@ -1,5 +1,5 @@
 import { CheckCircle2, Clock, Loader2, XCircle } from "lucide-react";
-import { KnowledgeBaseStatus } from "@/types/knowledge-base";
+import { KnowledgeBaseStatus } from "@/lib/types/knowledge-base";
 import { cn } from "@/lib/utils";
 
 const CONFIG: Record<

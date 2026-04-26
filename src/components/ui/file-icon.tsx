@@ -1,4 +1,4 @@
-import { KNOWLEDGE_BASE_META } from "@/types/knowledge-base";
+import { KNOWLEDGE_BASE_META } from "@/lib/types/knowledge-base";
 
 interface FileIconProps {
   type: "pdf" | "text" | "url";

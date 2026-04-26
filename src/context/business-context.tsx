@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
-import type { Business } from "@/types/business";
+import type { Business } from "@/lib/types/business";
 
 export type BusinessContextType = {
   business: Business | null;

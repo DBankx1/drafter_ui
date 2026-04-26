@@ -8,7 +8,7 @@ import type {
   KnowledgeBaseActions,
   KnowledgeBaseStatus,
   KnowledgeBaseType,
-} from "@/types/knowledge-base";
+} from "@/lib/types/knowledge-base";
 import { KnowledgeBaseRowActions } from "./row-actions";
 import { SourceTypeBadge } from "./source-type-badge";
 import { StatusBadge } from "./status-badge";
