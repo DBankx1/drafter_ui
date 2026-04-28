@@ -1,5 +1,5 @@
 import { getSupabaseClient } from "../supabase";
-import { getAuthTokens } from "./cookies";
+import { getAuthTokens, refreshAuthSession, isTokenExpired } from "./cookies";
 
 export type Session = {
   userId: string;
@@ -9,8 +9,14 @@ export type Session = {
 };
 
 export async function getSession(): Promise<Session | null> {
-  const tokens = await getAuthTokens();
+  let tokens = await getAuthTokens();
   if (!tokens) return null;
+
+  if (isTokenExpired(tokens.access_token)) {
+    const refreshed = await refreshAuthSession();
+    if (!refreshed) return null;
+    tokens = refreshed;
+  }
 
   const supabase = getSupabaseClient();
 

@@ -1,5 +1,9 @@
 import { cookies } from "next/headers";
-import { type AuthResponse, type TokenResponse } from "./auth-service";
+import {
+  type AuthResponse,
+  type TokenResponse,
+  refreshToken,
+} from "./auth-service";
 
 export const COOKIE_NAMES = {
   accessToken: "access_token",
@@ -18,7 +22,7 @@ export async function setAuthCookies(tokens: AuthResponse) {
 
   cookieStore.set(COOKIE_NAMES.accessToken, tokens.access_token, {
     ...BASE_COOKIE_OPTIONS,
-    maxAge: 60 * 15, // 15 minutes — match your JWT expiry
+    maxAge: 3600, // 1hr — match your JWT expiry
   });
 
   cookieStore.set(COOKIE_NAMES.refreshToken, tokens.refresh_token, {
@@ -41,4 +45,36 @@ export async function getAuthTokens(): Promise<TokenResponse | null> {
   if (!access_token || !refresh_token) return null;
 
   return { access_token, refresh_token };
+}
+
+export function isTokenExpired(token: string): boolean {
+  try {
+    const [, payload] = token.split(".");
+    if (!payload) return true;
+
+    const decoded = JSON.parse(
+      Buffer.from(payload, "base64").toString("utf-8"),
+    );
+    return typeof decoded.exp !== "number" || decoded.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+}
+
+export async function refreshAuthSession(): Promise<TokenResponse | null> {
+  const tokens = await getAuthTokens();
+  if (!tokens?.refresh_token) return null;
+
+  try {
+    const refreshed = await refreshToken(tokens.refresh_token);
+    await setAuthCookies(refreshed);
+
+    return {
+      access_token: refreshed.access_token,
+      refresh_token: refreshed.refresh_token,
+    };
+  } catch {
+    await clearAuthCookies();
+    return null;
+  }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Upload, Download, Plus, AlertCircle, Package } from "lucide-react";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import { ServiceCard } from "./service-card";
 import ServiceFormModal from "./service-form-modal";
 import type { ServiceConfig } from "@/lib/types/pricing";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CreatePricingConfigAction } from "@/lib/pricing/action";
 
 interface PricingConfigProps {
   services: ServiceConfig[];
@@ -22,26 +23,40 @@ export default function PricingConfigPage({
     null,
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [state, setState] = useState<{ success: boolean; error?: string }>({
+    success: false,
+  });
 
   const handleSaveService = (service: ServiceConfig) => {
     const isNew = !service.id;
-    const updatedService = isNew
-      ? { ...service, id: Date.now().toString() }
-      : service;
 
-    setPricingConfig((prev) => ({
-      services: isNew
-        ? [...prev.services, updatedService]
-        : prev.services.map((s) =>
-            s.id === updatedService.id ? updatedService : s,
-          ),
-    }));
+    if (isNew) {
+      startTransition(async () => {
+        const result = await CreatePricingConfigAction(
+          { success: false },
+          { services: [service] },
+        );
 
-    toast.success(
-      isNew ? "Service added successfully" : "Service updated successfully",
-    );
-    setIsModalOpen(false);
-    setEditingService(null);
+        if (result.success) {
+          const newService = { ...service, id: Date.now().toString() };
+          setPricingConfig((prev) => ({
+            services: [...prev.services, newService],
+          }));
+          toast.success("Service added successfully");
+          setIsModalOpen(false);
+          setEditingService(null);
+        } else {
+          toast.error(result.error || "Failed to add service");
+        }
+      });
+    } else {
+      setPricingConfig((prev) => ({
+        services: prev.services.map((s) => (s.id === service.id ? service : s)),
+      }));
+      toast.success("Service updated successfully");
+      setIsModalOpen(false);
+      setEditingService(null);
+    }
   };
 
   const handleDeleteService = (id: string) => {

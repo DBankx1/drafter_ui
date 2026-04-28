@@ -26,7 +26,7 @@ export async function loginAction(
     return { error: err instanceof Error ? err.message : "Login failed" };
   }
 
-  redirect("/dashboard");
+  redirect("/app/dashboard");
 }
 
 export async function signupAction(
