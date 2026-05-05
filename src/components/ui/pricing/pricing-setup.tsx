@@ -9,7 +9,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CreatePricingConfigAction } from "@/lib/pricing/action";
+import {
+  CreateServiceConfigAction,
+  DeleteServiceConfigAction,
+  UpdateServiceConfigAction,
+} from "@/lib/pricing/action";
 
 interface PricingConfigProps {
   services: ServiceConfig[];
@@ -23,18 +27,15 @@ export default function PricingConfigPage({
     null,
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [state, setState] = useState<{ success: boolean; error?: string }>({
-    success: false,
-  });
 
   const handleSaveService = (service: ServiceConfig) => {
     const isNew = !service.id;
 
     if (isNew) {
       startTransition(async () => {
-        const result = await CreatePricingConfigAction(
+        const result = await CreateServiceConfigAction(
           { success: false },
-          { services: [service] },
+          service,
         );
 
         if (result.success) {
@@ -50,20 +51,41 @@ export default function PricingConfigPage({
         }
       });
     } else {
-      setPricingConfig((prev) => ({
-        services: prev.services.map((s) => (s.id === service.id ? service : s)),
-      }));
-      toast.success("Service updated successfully");
-      setIsModalOpen(false);
-      setEditingService(null);
+      startTransition(async () => {
+        const result = await UpdateServiceConfigAction(
+          { success: false },
+          service.id,
+          service,
+        );
+
+        if (result.success) {
+          setPricingConfig((prev) => ({
+            services: prev.services.map((s) =>
+              s.id === service.id ? service : s,
+            ),
+          }));
+          toast.success("Service updated successfully");
+          setIsModalOpen(false);
+          setEditingService(null);
+        } else {
+          toast.error(result.error || "Failed to update service");
+        }
+      });
     }
   };
 
   const handleDeleteService = (id: string) => {
-    setPricingConfig((prev) => ({
-      services: prev.services.filter((s) => s.id !== id),
-    }));
-    toast.success("Service deleted successfully");
+    startTransition(async () => {
+      const result = await DeleteServiceConfigAction({ success: false }, id);
+      if (result.success) {
+        setPricingConfig((prev) => ({
+          services: prev.services.filter((s) => s.id !== id),
+        }));
+        toast.success("Service deleted successfully");
+      } else {
+        toast.error(result.error || "Failed to delete service");
+      }
+    });
   };
 
   const handleExport = () => {
