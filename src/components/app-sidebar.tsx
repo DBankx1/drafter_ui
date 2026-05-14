@@ -50,8 +50,8 @@ const navData = {
       icon: IconChartBar,
     },
     {
-      title: "Agent Config",
-      url: "/agent",
+      title: "Widget Config",
+      url: "/widget",
       icon: IconMessage2Cog,
     },
   ],

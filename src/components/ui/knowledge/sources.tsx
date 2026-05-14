@@ -20,11 +20,10 @@ import { FileText } from "lucide-react";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { useKnowledgeBase } from "@/components/ui/knowledge/context";
 
-export default function KnowledgeBaseSources({
-  kbList,
-}: Readonly<{ kbList: KnowledgeBase[] }>) {
-  const [kbSources, setKbSources] = useState<KnowledgeBase[]>(kbList);
+export default function KnowledgeBaseSources() {
+  const { sources: kbSources, removeSource } = useKnowledgeBase();
   const [textPreview, setTextPreview] = useState<{
     name: string;
     content: string;
@@ -65,7 +64,7 @@ export default function KnowledgeBaseSources({
   const deleteKnowledgeBase = async (item: KnowledgeBase) => {
     const result = await deleteKnowledgeBaseAction(item.id);
     if (result.success) {
-      setKbSources((prev) => prev.filter((kb) => kb.id !== item.id));
+      removeSource(item.id);
       toast.success("Knowledge base deleted", {
         position: "top-center",
         closeButton: true,
@@ -80,16 +79,17 @@ export default function KnowledgeBaseSources({
 
   return (
     <div>
-      <p className="text-upper text-primary/50 text-xs font-bold tracking-wider uppercase">
-        Your Knowledge Sources
-      </p>
+      <div className="mb-4 flex items-center gap-3">
+        <p className="shrink-0 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Your sources
+        </p>
+        <div className="h-px flex-1 bg-border" />
+      </div>
       <KnowledgeBaseTable
-        className="mt-4"
         data={kbSources}
         onView={viewKnowledgeBase}
         onDownload={downloadKnowledgeBase}
         onDelete={deleteKnowledgeBase}
-        onAddSource={() => console.log(true)}
       />
       <Dialog
         open={!!textPreview}
@@ -113,7 +113,7 @@ export default function KnowledgeBaseSources({
           </DialogHeader>
 
           <ScrollArea className="border-border bg-muted/30 h-[60vh] w-full rounded-lg border p-4">
-            <pre className="text-foreground/80 font-mono text-sm leading-relaxed break-words whitespace-pre-wrap">
+            <pre className="text-foreground/80 font-mono text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
               {textPreview?.content}
             </pre>
           </ScrollArea>

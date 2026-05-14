@@ -1,23 +1,44 @@
 "use client";
 
-import FileIcon from "@/components/ui/file-icon";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
-import { Progress } from "@/components/ui/progress";
-import { PlusIcon } from "lucide-react";
 import { toast } from "sonner";
 import { uploadTextKnowledgeBaseAction } from "@/lib/knowledge/actions";
+import { useKnowledgeBase } from "@/components/ui/knowledge/context";
+import { KnowledgeBaseStatus, KnowledgeBaseType } from "@/lib/types/knowledge-base";
 
-export default function TXTUploader() {
-  const initialFormState = { label: "", content: "" };
-  const [form, setForm] = useState(initialFormState);
+const INITIAL_FORM = { label: "", content: "" };
+const MAX_CONTENT = 10_000;
+
+function IndeterminateProgress({ label }: { label: string }) {
+  return (
+    <div className="space-y-1.5">
+      <div className="relative h-0.5 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="absolute inset-y-0 w-2/5 rounded-full bg-primary/70"
+          style={{ animation: "indeterminate 1.8s cubic-bezier(0.4,0,0.2,1) infinite" }}
+        />
+      </div>
+      <p className="text-center text-xs text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+export default function TextUploaderPanel() {
+  const { addOptimistic, confirmAdd, rollbackAdd } = useKnowledgeBase();
+  const [form, setForm] = useState(INITIAL_FORM);
   const [isPending, startTransition] = useTransition();
   const [clientError, setClientError] = useState<string | null>(null);
   const [state, setState] = useState<{ success: boolean; error?: string }>({
     success: false,
   });
+
   const errorMessage = clientError ?? state.error;
+  const charCount = form.content.length;
 
   useEffect(() => {
     if (state.success) {
@@ -25,97 +46,131 @@ export default function TXTUploader() {
         position: "top-center",
         closeButton: true,
       });
-      setForm(initialFormState);
+      setForm(INITIAL_FORM);
     } else if (state.error) {
       toast.error(state.error, { position: "top-center", closeButton: true });
     }
   }, [state.success, state.error]);
 
   const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { name, value } = event.currentTarget;
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.currentTarget;
       setForm((prev) => ({ ...prev, [name]: value }));
       if (name === "content") setClientError(null);
     },
     [],
   );
 
-  async function handleTextUpload() {
+  function handleTextUpload() {
     if (!form.content.trim()) {
       setClientError("Text content cannot be empty.");
       return;
-    } else {
-      setClientError(null);
     }
+    setClientError(null);
+
     const label =
       form.label.trim() ||
       `Text snippet — ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+
+    const tempId = crypto.randomUUID();
+    addOptimistic(tempId, {
+      id: tempId,
+      business_id: "",
+      source_type: KnowledgeBaseType.TEXT,
+      status: KnowledgeBaseStatus.PENDING,
+      source_reference: form.content,
+      uploaded_at: new Date(),
+      meta: null,
+      name: label,
+      size_bytes: new Blob([form.content]).size,
+    });
+
     startTransition(async () => {
       const result = await uploadTextKnowledgeBaseAction(
         { success: false },
         label,
         form.content,
       );
+      if (result.success && result.data) {
+        confirmAdd(tempId, result.data);
+      } else {
+        rollbackAdd(tempId);
+      }
       setState(result);
     });
   }
 
   return (
-    <div className="kb-anim border-primary/10 flex flex-col gap-3 overflow-hidden rounded-xl border bg-white p-5">
-      <div className="mb-5 flex flex-row items-center gap-4">
-        <FileIcon type="text" size={34} />
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         <div>
-          <p className="text-sm font-bold">Text Snippet</p>
-          <p className="text-primary/40 text-xs">
-            Bios, taglines, descriptions
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            Label{" "}
+            <span className="font-normal text-muted-foreground/60">
+              (optional)
+            </span>
+          </label>
+          <Input
+            placeholder="e.g. Mission Statement, About Us"
+            value={form.label}
+            name="label"
+            disabled={isPending}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            Content{" "}
+            <span className="font-normal text-muted-foreground/60">
+              (required)
+            </span>
+          </label>
+          <Textarea
+            placeholder="Paste your text here — company overview, service descriptions, team bios, FAQs…"
+            name="content"
+            value={form.content}
+            onChange={handleChange}
+            disabled={isPending}
+            maxLength={MAX_CONTENT}
+            rows={6}
+            className="resize-none"
+          />
+          <p className="mt-1.5 text-right text-xs text-muted-foreground">
+            <span
+              className={
+                charCount > MAX_CONTENT * 0.9 ? "text-amber-600" : ""
+              }
+            >
+              {charCount.toLocaleString()}
+            </span>
+            /{MAX_CONTENT.toLocaleString()}
           </p>
         </div>
       </div>
 
-      <input
-        className="border-primary/10 mb-2 w-full rounded-lg border bg-white p-3 text-sm"
-        placeholder="Label (e.g. Mission Statement)"
-        value={form.label}
-        name="label"
-        onChange={handleChange}
-      />
-      <textarea
-        className="border-primary/10 mb-2 w-full rounded-lg border bg-white p-3 text-sm"
-        placeholder="Paste your text here…"
-        name="content"
-        value={form.content}
-        onChange={handleChange}
-        rows={4}
-        style={{ resize: "vertical", marginBottom: isPending ? 0 : 12 }}
-      />
-
       {errorMessage && (
-        <p className="text-destructive mb-4 text-xs">{errorMessage}</p>
+        <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+          {errorMessage}
+        </p>
       )}
 
-      {isPending && (
-        <div className="mb-4">
-          <Progress className="h-1" value={66} />
-          <p className="text-primary/40 mt-1 text-center text-xs">
-            Saving & indexing...
-          </p>
-        </div>
-      )}
+      {isPending && <IndeterminateProgress label="Saving & indexing your text…" />}
 
       <Button
         disabled={isPending || !form.content.trim()}
         type="button"
-        className="w-full bg-[#1d4ed8] py-5 text-white hover:cursor-pointer hover:bg-[#1e40af]"
         onClick={handleTextUpload}
+        className="w-full"
       >
         {isPending ? (
           <>
-            <Spinner data-icon="inline-start" />
-            Uploading Text...
+            <Spinner />
+            Uploading…
           </>
         ) : (
           <>
-            <PlusIcon />
+            <Plus className="size-4" />
             Upload Text
           </>
         )}

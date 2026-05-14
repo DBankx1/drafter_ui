@@ -1,11 +1,20 @@
 "use client";
 
+import { useEffect, useState, useTransition } from "react";
+import { Plus, X, Save } from "lucide-react";
 import type { ServiceConfig } from "@/lib/types/pricing";
-import { X, Plus, Save } from "lucide-react";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -14,205 +23,272 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../select";
-import { Textarea } from "@/components/ui/textarea";
+import { Spinner } from "@/components/ui/spinner";
 
-interface ServiceFormModalProps {
+const EMPTY_FORM: ServiceConfig = {
+  id: "",
+  name: "",
+  description: "",
+  pricing_type: "fixed",
+  base_price: 0,
+  options: [],
+};
+
+interface ServiceFormDialogProps {
+  open: boolean;
   service: ServiceConfig | null;
-  onSave: (service: ServiceConfig) => void;
+  onSave: (service: ServiceConfig) => Promise<{ success: boolean; error?: string }>;
   onClose: () => void;
 }
 
-export default function ServiceFormModal({
+export default function ServiceFormDialog({
+  open,
   service,
   onSave,
   onClose,
-}: Readonly<ServiceFormModalProps>) {
-  const [formData, setFormData] = useState(
-    service ||
-      ({
-        id: "",
-        name: "",
-        description: "",
-        pricing_type: "fixed",
-        base_price: 0,
-        options: [],
-      } as ServiceConfig),
-  );
-
+}: Readonly<ServiceFormDialogProps>) {
+  const [formData, setFormData] = useState<ServiceConfig>(service ?? EMPTY_FORM);
   const [newOption, setNewOption] = useState({ name: "", price: 0 });
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = () => {
-    if (formData.name && formData.base_price > 0) {
-      onSave(formData);
-    }
-  };
-
-  const addOption = () => {
-    if (newOption.name && newOption.price > 0) {
-      setFormData({
-        ...formData,
-        options: [...formData.options, newOption],
-      });
+  // Reset form whenever the dialog opens or the target service changes
+  useEffect(() => {
+    if (open) {
+      setFormData(service ?? { ...EMPTY_FORM });
+      setFormError(null);
       setNewOption({ name: "", price: 0 });
     }
-  };
+  }, [open, service]);
 
-  const removeOption = (idx: number) => {
-    setFormData({
-      ...formData,
-      options: formData.options.filter((_, i) => i !== idx),
+  function handleSubmit() {
+    if (!formData.name.trim()) {
+      setFormError("Service name is required.");
+      return;
+    }
+    if (formData.base_price <= 0) {
+      setFormError("Base price must be greater than zero.");
+      return;
+    }
+    setFormError(null);
+
+    startTransition(async () => {
+      const result = await onSave(formData);
+      if (!result.success) {
+        setFormError(result.error ?? "Failed to save. Please try again.");
+      }
+      // Parent calls onClose() on success after updating state
     });
-  };
+  }
+
+  function addOption() {
+    if (!newOption.name.trim() || newOption.price <= 0) return;
+    setFormData((prev) => ({
+      ...prev,
+      options: [...prev.options, { ...newOption }],
+    }));
+    setNewOption({ name: "", price: 0 });
+  }
+
+  function removeOption(idx: number) {
+    setFormData((prev) => ({
+      ...prev,
+      options: prev.options.filter((_, i) => i !== idx),
+    }));
+  }
+
+  function handleOpenChange(o: boolean) {
+    if (!o && !isPending) onClose();
+  }
+
+  const isEdit = Boolean(service?.id);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-2xl">
-        <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {service ? "Edit Service" : "Add New Service"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-2 transition-colors hover:bg-gray-100"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? "Edit service" : "Add new service"}</DialogTitle>
+          <DialogDescription>
+            {isEdit
+              ? "Update the pricing and details for this service."
+              : "Add a service to your pricing configuration for accurate proposal generation."}
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="space-y-6 p-6">
-          <div className="space-y-4">
-            <div>
-              <Label className="mb-2 block text-sm font-medium text-gray-700">
-                Service Name *
+        <div className="flex flex-col gap-4">
+          {/* Service name */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="svc-name">
+              Service name{" "}
+              <span className="text-destructive" aria-hidden>
+                *
+              </span>
+            </Label>
+            <Input
+              id="svc-name"
+              placeholder="e.g. Website Development"
+              value={formData.name}
+              disabled={isPending}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, name: e.target.value }))
+              }
+            />
+          </div>
+
+          {/* Description */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="svc-desc">
+              Description{" "}
+              <span className="text-xs font-normal text-muted-foreground">
+                (optional)
+              </span>
+            </Label>
+            <Textarea
+              id="svc-desc"
+              placeholder="Brief description of this service…"
+              value={formData.description ?? ""}
+              disabled={isPending}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, description: e.target.value }))
+              }
+              rows={2}
+              className="resize-none"
+            />
+          </div>
+
+          {/* Pricing type + base price */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="svc-type">
+                Pricing type{" "}
+                <span className="text-destructive" aria-hidden>
+                  *
+                </span>
+              </Label>
+              <Select
+                value={formData.pricing_type}
+                disabled={isPending}
+                onValueChange={(v) =>
+                  setFormData((p) => ({
+                    ...p,
+                    pricing_type: v as ServiceConfig["pricing_type"],
+                  }))
+                }
+              >
+                <SelectTrigger id="svc-type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="fixed">Fixed Price</SelectItem>
+                    <SelectItem value="hourly">Hourly Rate</SelectItem>
+                    <SelectItem value="tiered">Tiered Pricing</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="svc-price">
+                Base price ($){" "}
+                <span className="text-destructive" aria-hidden>
+                  *
+                </span>
               </Label>
               <Input
-                type="text"
-                value={formData.name}
+                id="svc-price"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={formData.base_price || ""}
+                disabled={isPending}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData((p) => ({
+                    ...p,
+                    base_price: parseFloat(e.target.value) || 0,
+                  }))
                 }
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., Website Development"
               />
-            </div>
-
-            <div>
-              <Label className="mb-2 block text-sm font-medium text-gray-700">
-                Description
-              </Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                rows={3}
-                className="w-full resize-none rounded-lg border border-gray-300 px-4 py-2 outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                placeholder="Brief description of the service"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="mb-2 block text-sm font-medium text-gray-700">
-                  Pricing Type *
-                </Label>
-                <Select
-                  onValueChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      pricing_type: value as ServiceConfig["pricing_type"],
-                    })
-                  }
-                  value={formData.pricing_type}
-                >
-                  <SelectTrigger className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500">
-                    <SelectValue placeholder="Select pricing type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="fixed">Fixed Price</SelectItem>
-                      <SelectItem value="hourly">Hourly Rate</SelectItem>
-                      <SelectItem value="tiered">Tiered Pricing</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="mb-2 block text-sm font-medium text-gray-700">
-                  Base Price ($) *
-                </Label>
-                <Input
-                  type="number"
-                  value={formData.base_price}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      base_price: Number.parseFloat(e.target.value) || 0,
-                    })
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
             </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="mb-4 text-sm font-semibold text-gray-900">
-              Add-on Options
-            </h3>
+          {/* Add-ons */}
+          <div className="flex flex-col gap-3 border-t pt-4">
+            <div>
+              <p className="text-sm font-medium">Add-on options</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Optional line items the AI can include in proposals.
+              </p>
+            </div>
 
-            <div className="mb-4 flex gap-2">
+            <div className="flex gap-2">
               <Input
-                type="text"
                 placeholder="Option name"
                 value={newOption.name}
+                disabled={isPending}
                 onChange={(e) =>
-                  setNewOption({ ...newOption, name: e.target.value })
+                  setNewOption((p) => ({ ...p, name: e.target.value }))
                 }
-                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                onKeyDown={(e) => e.key === "Enter" && addOption()}
+                className="flex-1"
               />
-              <Input
-                type="number"
-                placeholder="Price"
-                value={newOption.price || ""}
-                onChange={(e) =>
-                  setNewOption({
-                    ...newOption,
-                    price: parseFloat(e.target.value) || 0,
-                  })
-                }
-                className="w-32 rounded-lg border border-gray-300 px-4 py-2 outline-none focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                min="0"
-                step="0.01"
-              />
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  $
+                </span>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                  step="0.01"
+                  value={newOption.price || ""}
+                  disabled={isPending}
+                  onChange={(e) =>
+                    setNewOption((p) => ({
+                      ...p,
+                      price: parseFloat(e.target.value) || 0,
+                    }))
+                  }
+                  onKeyDown={(e) => e.key === "Enter" && addOption()}
+                  className="w-24 pl-6"
+                />
+              </div>
               <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                disabled={
+                  !newOption.name.trim() || newOption.price <= 0 || isPending
+                }
                 onClick={addOption}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200"
+                className="shrink-0"
               >
-                <Plus className="h-5 w-5" />
+                <Plus className="size-4" />
               </Button>
             </div>
 
             {formData.options.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-1.5 rounded-lg border bg-muted/20 p-2">
                 {formData.options.map((option, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-2"
+                    className="flex items-center justify-between rounded-md bg-background px-3 py-2 shadow-xs"
                   >
-                    <span className="text-sm text-gray-700">{option.name}</span>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-semibold text-gray-900">
-                        ${option.price.toLocaleString()}
+                    <span className="text-sm">{option.name}</span>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-sm font-semibold tabular-nums">
+                        +${option.price.toLocaleString()}
                       </span>
                       <Button
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        disabled={isPending}
                         onClick={() => removeOption(idx)}
-                        className="bg-background hover:bg-background text-red-600 hover:cursor-pointer hover:text-red-700"
+                        className="size-6 text-muted-foreground hover:text-destructive"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="size-3" />
                       </Button>
                     </div>
                   </div>
@@ -221,23 +297,37 @@ export default function ServiceFormModal({
             )}
           </div>
 
-          <div className="flex gap-3 border-t border-gray-200 pt-6">
-            <Button
-              onClick={onClose}
-              className="bg-background flex-1 rounded-lg border border-gray-300 font-medium text-gray-700 transition-colors hover:bg-gray-50"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              className="bg-primary flex flex-1 items-center justify-center gap-2 rounded-lg font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              <Save className="h-4 w-4" />
-              {service ? "Update Service" : "Add Service"}
-            </Button>
-          </div>
+          {/* Inline form error */}
+          {formError && (
+            <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+              {formError}
+            </p>
+          )}
         </div>
-      </div>
-    </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => !isPending && onClose()}
+            disabled={isPending}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={isPending}>
+            {isPending ? (
+              <>
+                <Spinner />
+                Saving…
+              </>
+            ) : (
+              <>
+                <Save className="size-4" />
+                {isEdit ? "Update service" : "Add service"}
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

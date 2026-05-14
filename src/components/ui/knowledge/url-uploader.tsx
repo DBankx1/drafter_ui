@@ -1,22 +1,40 @@
 "use client";
 
-import { GlobeIcon } from "lucide-react";
+import { Globe, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import FileIcon from "@/components/ui/file-icon";
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { Progress } from "@/components/ui/progress";
 import { uploadUrlKnowledgeBaseAction } from "@/lib/knowledge/actions";
 import { toast } from "sonner";
+import { useKnowledgeBase } from "@/components/ui/knowledge/context";
+import { KnowledgeBaseStatus, KnowledgeBaseType } from "@/lib/types/knowledge-base";
 
-export default function URLUploader() {
-  const initialFormState = { label: "", url: "" };
-  const [form, setForm] = useState(initialFormState);
+const INITIAL_FORM = { label: "", url: "" };
+
+function IndeterminateProgress({ label }: { label: string }) {
+  return (
+    <div className="space-y-1.5">
+      <div className="relative h-0.5 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="absolute inset-y-0 w-2/5 rounded-full bg-primary/70"
+          style={{ animation: "indeterminate 1.8s cubic-bezier(0.4,0,0.2,1) infinite" }}
+        />
+      </div>
+      <p className="text-center text-xs text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+export default function URLUploaderPanel() {
+  const { addOptimistic, confirmAdd, rollbackAdd } = useKnowledgeBase();
+  const [form, setForm] = useState(INITIAL_FORM);
   const [clientError, setClientError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [state, setState] = useState<{ success: boolean; error?: string }>({
     success: false,
   });
+
   const errorMessage = clientError ?? state.error;
 
   useEffect(() => {
@@ -25,99 +43,136 @@ export default function URLUploader() {
         position: "top-center",
         closeButton: true,
       });
-      setForm(initialFormState);
+      setForm(INITIAL_FORM);
     } else if (state.error) {
       toast.error(state.error, { position: "top-center", closeButton: true });
     }
   }, [state.success, state.error]);
 
   const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { name, value } = event.currentTarget;
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.currentTarget;
       setForm((prev) => ({ ...prev, [name]: value }));
-      if (name === "content") setClientError(null);
+      if (name === "url") setClientError(null);
     },
     [],
   );
 
-  async function handleTextUpload() {
+  function handleUrlUpload() {
     if (!form.url.trim()) {
       setClientError("URL cannot be empty.");
       return;
-    } else {
-      setClientError(null);
     }
+
+    try {
+      new URL(form.url.trim());
+    } catch {
+      setClientError("Please enter a valid URL including https://");
+      return;
+    }
+
+    setClientError(null);
+
+    const label = form.label.trim() || form.url.trim();
+    const url = form.url.trim();
+
+    const tempId = crypto.randomUUID();
+    addOptimistic(tempId, {
+      id: tempId,
+      business_id: "",
+      source_type: KnowledgeBaseType.URL,
+      status: KnowledgeBaseStatus.PENDING,
+      source_reference: url,
+      uploaded_at: new Date(),
+      meta: null,
+      name: label,
+    });
 
     startTransition(async () => {
       const result = await uploadUrlKnowledgeBaseAction(
         { success: false },
         form.label,
-        form.url.trim(),
+        url,
       );
+      if (result.success && result.data) {
+        confirmAdd(tempId, result.data);
+      } else {
+        rollbackAdd(tempId);
+      }
       setState(result);
     });
   }
 
   return (
-    <div className="kb-anim border-primary/10 flex flex-col gap-3 overflow-hidden rounded-xl border bg-white p-5">
-      <div className="mb-5 flex flex-row items-center gap-4">
-        <FileIcon type="url" size={34} />
+    <div className="flex flex-col gap-3">
+      <div className="flex items-start gap-2.5 rounded-lg border border-sky-200 bg-sky-50 px-3.5 py-3 dark:border-sky-800 dark:bg-sky-950/30">
+        <Info className="mt-0.5 size-3.5 shrink-0 text-sky-600 dark:text-sky-400" />
+        <p className="text-xs leading-relaxed text-sky-700 dark:text-sky-400">
+          Drafter will crawl and extract content from the page. Works best on
+          public pages — login-protected content cannot be indexed.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
         <div>
-          <p className="text-sm font-bold">Web URL</p>
-          <p className="text-primary/40 text-xs">
-            Website pages, portfolios, documentation
-          </p>
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            Label{" "}
+            <span className="font-normal text-muted-foreground/60">
+              (optional)
+            </span>
+          </label>
+          <Input
+            placeholder="e.g. Services page, Documentation, Pricing"
+            value={form.label}
+            name="label"
+            disabled={isPending}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            URL{" "}
+            <span className="font-normal text-muted-foreground/60">
+              (required)
+            </span>
+          </label>
+          <Input
+            placeholder="https://yourcompany.com/services"
+            value={form.url}
+            name="url"
+            type="url"
+            disabled={isPending}
+            onChange={handleChange}
+            onKeyDown={(e) => e.key === "Enter" && handleUrlUpload()}
+          />
         </div>
       </div>
 
-      <div className="border-chart-2/50 bg-chart-2/10 text-chart-2 mb-2 rounded-xl border p-3 text-xs">
-        Drafter will crawl the page and extract readable content. Best for
-        public pages — login-protected pages cannot be indexed.
-      </div>
-
-      <input
-        className="border-primary/10 mb-2 w-full rounded-lg border bg-white p-3 text-sm"
-        placeholder="Label (e.g. Pricing page, Documentation, etc.)"
-        value={form.label}
-        name="label"
-        onChange={handleChange}
-      />
-
-      <input
-        className="border-primary/10 mb-2 w-full rounded-lg border bg-white p-3 text-sm"
-        placeholder="https://yourcompany.com/services"
-        value={form.url}
-        name="url"
-        onChange={handleChange}
-      />
-
       {errorMessage && (
-        <p className="text-destructive mb-4 text-xs">{errorMessage}</p>
+        <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+          {errorMessage}
+        </p>
       )}
 
       {isPending && (
-        <div className="mb-4">
-          <Progress className="h-1" value={66} />
-          <p className="text-primary/40 mt-1 text-center text-xs">
-            Saving & indexing...
-          </p>
-        </div>
+        <IndeterminateProgress label="Crawling & indexing your page…" />
       )}
 
       <Button
         disabled={isPending || !form.url.trim()}
         type="button"
-        className="bg-chart-2 hover:bg-chart-3 w-full py-5 text-white hover:cursor-pointer"
-        onClick={handleTextUpload}
+        onClick={handleUrlUpload}
+        className="w-full"
       >
         {isPending ? (
           <>
-            <Spinner data-icon="inline-start" />
-            Indexing URL...
+            <Spinner />
+            Indexing…
           </>
         ) : (
           <>
-            <GlobeIcon />
+            <Globe className="size-4" />
             Index URL
           </>
         )}

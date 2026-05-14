@@ -75,7 +75,7 @@ export function buildColumns(
 
     // ── Size ──────────────────────────────────────────────────────────────────
     {
-      accessorKey: "kb_size",
+      accessorKey: "size_bytes",
       header: () => (
         <span className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
           Size

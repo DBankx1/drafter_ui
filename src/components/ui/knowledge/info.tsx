@@ -1,56 +1,82 @@
 "use client";
 
-import HintBox from "@/components/ui/hint-box";
-import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { ChevronDown, HelpCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const HINT_ITEMS = [
+  {
+    icon: "📄",
+    title: "PDF documents",
+    description:
+      "Upload company brochures, pricing sheets, service descriptions, or case studies. Max 10 MB per file.",
+  },
+  {
+    icon: "✏️",
+    title: "Text snippets",
+    description:
+      "Paste bios, taglines, mission statements, or any text you want Drafter to reference when writing proposals.",
+  },
+  {
+    icon: "🔗",
+    title: "URLs & web pages",
+    description:
+      "Add links to your website or portfolio. Drafter crawls and indexes the content automatically.",
+  },
+];
 
 export function KnowledgeBaseInfo() {
-  const [hintOpen, setHintOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="mb-7">
-      <div className="mb-4 flex items-center gap-2">
-        <p className="text-upper text-primary/50 text-xs font-bold tracking-wider uppercase">
-          What is a Knowledge Base?
-        </p>
-        <button
-          onClick={() => setHintOpen((o) => !o)}
-          className="cursor-pointer rounded-full border bg-white p-0.5"
-        >
-          {hintOpen ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
+    <div className="mb-6">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <HelpCircle className="size-3.5" />
+        <span className="font-medium">What is a knowledge base?</span>
+        <ChevronDown
+          className={cn(
+            "size-3.5 transition-transform duration-200",
+            open && "rotate-180",
           )}
-        </button>
-      </div>
-      {hintOpen && (
-        <div className="kb-anim border-primary/10 flex flex-col gap-3 overflow-hidden rounded-xl border bg-white p-5">
-          <p className="text-primary/80 text-sm leading-[1.7]">
-            A <strong className="text-[#0f172a]">knowledge base</strong> is a
+        />
+      </button>
+
+      {open && (
+        <div className="mt-3 overflow-hidden rounded-xl border bg-card p-5">
+          <p className="mb-4 text-sm leading-relaxed text-foreground/80">
+            A <strong className="text-foreground">knowledge base</strong> is a
             collection of information about your company that Drafter AI uses to
-            write accurate, personalised proposals. The richer your knowledge
-            base, the better your proposals.
+            write accurate, personalised proposals. The richer it is, the better
+            your proposals.
           </p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <HintBox icon="📄" title="PDF documents">
-              Upload company brochures, pricing sheets, service descriptions,
-              case studies, or any business document in{" "}
-              <strong>PDF format</strong> (max 20 MB per file).
-            </HintBox>
-            <HintBox icon="✏️" title="Text snippets">
-              Paste short descriptions, taglines, team bios, mission statements,
-              or any text you want Drafter to reference when writing proposals.
-            </HintBox>
-            <HintBox icon="🔗" title="URLs & web pages">
-              Add links to your website, portfolio, or public pages. Drafter
-              will crawl and index the content automatically.
-            </HintBox>
+
+          <div className="mb-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+            {HINT_ITEMS.map((item) => (
+              <div
+                key={item.title}
+                className="flex gap-3 rounded-lg border bg-muted/30 p-3.5"
+              >
+                <span className="mt-0.5 shrink-0 text-base">{item.icon}</span>
+                <div>
+                  <p className="mb-1 text-xs font-semibold text-foreground">
+                    {item.title}
+                  </p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="rounded-xl border border-[#fde68a] bg-[#fefcef] px-6 py-4">
-            <p className="text-xs leading-[1.6] text-[#92400e]">
-              <strong>Tip:</strong> Start with an "About Us" PDF, a pricing
-              document, and your website URL - that combination covers most
-              proposal scenarios. You can add more sources at any time.
+
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/30">
+            <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+              <strong>Tip:</strong> Start with an &ldquo;About Us&rdquo; PDF, a
+              pricing document, and your website URL — that combination covers
+              most proposal scenarios.
             </p>
           </div>
         </div>

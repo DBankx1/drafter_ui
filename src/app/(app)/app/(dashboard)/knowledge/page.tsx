@@ -1,8 +1,10 @@
-import { KnowledgeBaseInfo } from "@/components/ui/knowledge/info";
-import KnowledgeBaseSources from "@/components/ui/knowledge/sources";
-import KnowledgeBaseUploadSources from "@/components/ui/knowledge/upload-sources";
-import { getKnowlegeBaseList } from "@/lib/knowledge/knowledge-base-service";
 import { redirect } from "next/navigation";
+import { KnowledgeBaseProvider } from "@/components/ui/knowledge/context";
+import { KnowledgeBaseHeader } from "@/components/ui/knowledge/header";
+import { KnowledgeBaseInfo } from "@/components/ui/knowledge/info";
+import KnowledgeBaseUploadSources from "@/components/ui/knowledge/upload-sources";
+import KnowledgeBaseSources from "@/components/ui/knowledge/sources";
+import { getKnowlegeBaseList } from "@/lib/knowledge/knowledge-base-service";
 
 export default async function Page() {
   let knowledgebases;
@@ -15,9 +17,12 @@ export default async function Page() {
 
   return (
     <div className="p-2 md:p-4">
-      <KnowledgeBaseInfo />
-      <KnowledgeBaseUploadSources />
-      <KnowledgeBaseSources kbList={knowledgebases} />
+      <KnowledgeBaseProvider initialSources={knowledgebases ?? []}>
+        <KnowledgeBaseHeader />
+        <KnowledgeBaseInfo />
+        <KnowledgeBaseUploadSources />
+        <KnowledgeBaseSources />
+      </KnowledgeBaseProvider>
     </div>
   );
 }
